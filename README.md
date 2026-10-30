@@ -1,39 +1,128 @@
 <div align="center">
 
-<img src="docs/mark.svg" width="96" alt="FileWheel" />
+<img src="docs/mark.svg" width="88" alt="FileWheel" />
 
 # FileWheel
 
 ### A new format. A small gesture.
 
-A translucent conversion wheel, right where your files are.
+A translucent conversion wheel for Finder and your desktop.
 
-**macOS · Adaptive appearance · Original files preserved**
+[![macOS checks](https://github.com/ethan-rong/filewheel/actions/workflows/check.yml/badge.svg)](https://github.com/ethan-rong/filewheel/actions/workflows/check.yml)
+![macOS 13+](https://img.shields.io/badge/macOS-13%2B-22202b)
+![Swift](https://img.shields.io/badge/Swift-native-6446c7)
+[![MIT License](https://img.shields.io/badge/license-MIT-b6a1ed)](LICENSE)
+
+**Hover. Choose. Keep the original.**
 
 </div>
 
----
+<img src="docs/preview.png" alt="FileWheel's document conversion wheel in light and dark appearances" width="100%" />
 
-## The idea
+<p align="center"><sub>Rendered from the actual SwiftUI view. Backdrop appearance depends on your desktop and macOS accessibility settings.</sub></p>
 
-Hover over a file, choose a format from a radial picker, and find the converted copy beside the original. The wheel shows relevant choices for images, documents, PDFs, audio, and video.
+## Right where your files are
 
-Light frosted material in light mode. Smoked material in dark mode. Clear, opaque labels in both. Inspired by [Filee's radial interaction](https://filee.sh/), with an original native macOS design.
+**Early preview:** conversion tests pass locally. Live Finder-hover verification is pending on the development Mac; the integration depends on Finder's accessibility tree and the user's permission.
 
-## Project status
+Rest your pointer over a supported file for about a second. A wheel appears with formats that fit that file. Click a format; the converted copy lands beside the original. If the name is taken, FileWheel adds a number.
 
-**Design stage — no working release yet.** The interaction and visual direction are defined. The setup model is being selected: Finder hover requires a local background helper and Accessibility permission; a browser-only version would require choosing or dropping files inside the browser.
+No main app window, account, or upload. One local setup builds a small menu-bar helper from source and starts it at login. **Local code is required**: a website cannot inspect the file under your pointer in Finder. macOS packages the helper in an `.app` bundle for its permission identity; you do not download a separate application or keep a window open.
 
-Read the [design notes](docs/DESIGN.md).
+## Set up once
 
-## Principles
+Requires **macOS 13 or later**, Apple Command Line Tools with **Swift 5.9+**, and Git. If needed, install Apple's tools with `xcode-select --install`, then finish that installation before continuing.
 
-- Keep the original. Write a new file, never silently overwrite one.
-- Convert the contents, not just the extension.
-- Show only meaningful formats for the selected file.
-- Keep files local.
-- Keep the interface small.
+```sh
+git clone https://github.com/ethan-rong/filewheel.git
+cd filewheel
+./scripts/install.sh
+```
 
-## License
+Enable **FileWheel** in **System Settings → Privacy & Security → Accessibility**. Use **Enable Finder hover…** from its menu-bar icon to open that pane. The wheel preview and **Choose a file…** work without Accessibility access.
 
-MIT. FileWheel is an independent project and is not affiliated with Filee.
+Optional local conversion engines:
+
+```sh
+brew install ffmpeg   # Audio and video
+brew install webp     # WebP output
+```
+
+These are installed separately through [Homebrew](https://brew.sh/); FileWheel does not silently download engines. Native image, PDF, and document conversion needs neither.
+
+## The wheel
+
+| Action | Result |
+| --- | --- |
+| Rest the pointer over a Finder or desktop file | Open its format wheel |
+| Hover a sector | Preview a format |
+| Click a sector or press Return | Convert |
+| Scroll, Tab / Shift-Tab, or arrow keys | Move between formats |
+| Escape or click elsewhere | Close the wheel |
+| Cancel while converting | Stop; leave the original intact |
+| Show in Finder after conversion | Reveal the output |
+| Menu bar → Pause hovering | Stop automatic wheels until resumed |
+
+Frosted material in light mode. Smoked material in dark mode. Opaque labels and a violet selection in both. The wheel respects **Reduce Transparency** and **Reduce Motion**.
+
+## Common formats, real conversions
+
+| Input | Outputs | Engine |
+| --- | --- | --- |
+| Still images supported by macOS, including PNG, JPG, HEIC, TIFF, BMP, WebP | PNG, JPG, HEIC, TIFF, BMP, PDF; WebP with its optional encoder | Image I/O, Core Graphics; optional `cwebp` |
+| TXT, Markdown, RTF, DOC, DOCX, ODT, HTML | TXT, RTF, DOCX, HTML, ODT | macOS `textutil` |
+| PDF | PNG, JPG, TIFF in a folder containing **every page**; TXT when text is extractable | PDFKit |
+| MP3, M4A, WAV, FLAC, OGG, AIFF, AAC, Opus | MP3, M4A, WAV, FLAC, AIFF, OGG/Opus | Optional FFmpeg |
+| MP4, MOV, MKV, WebM, AVI, M4V, MPEG | MP4, MOV, MKV, WebM; MP3 or WAV audio extraction | Optional FFmpeg |
+
+The wheel omits the current extension. Image outputs depend on the encoders available on that Mac. A source's extension identifies the candidate conversion family; the engine still validates its contents. Renaming an extension is never presented as conversion.
+
+### Know what changes
+
+- Originals and existing outputs are never overwritten. Intermediate files are staged in a private temporary folder beside the source and cleaned up after success, failure, or cancellation.
+- Image conversion preserves visual orientation, but does not retain photo metadata. Transparent areas become white in formats without alpha. Animated/multi-frame images and SVG are not supported. Images above 100 megapixels are rejected.
+- PDF images render every page at 144 dpi into a new folder. Text extraction does not include OCR or PDF-to-Word. Locked PDFs need to be unlocked first.
+- Document layouts may change. Markdown is handled as literal plain text, not rendered Markdown. HTML resource loading is disabled.
+- Audio conversion takes the first audio track. Video conversion takes the main video and first audio track and omits subtitles/extra tracks. Lossy formats may reduce quality; these are not archival conversions.
+- Unsupported files, directories, and symbolic links are ignored or rejected. Download cloud placeholders before converting. The source folder must be writable.
+
+## Finder permissions & privacy
+
+Accessibility lets the helper read the Finder item under your pointer. It checks that the hit belongs to Finder before resolving a file. Where Finder does not expose a file URL, it uses the displayed name and enclosing folder; ambiguous names are rejected rather than guessed.
+
+Conversions run locally. There is no telemetry, account system, or upload endpoint. FFmpeg is restricted to local file/pipe protocols. The help menu opens this GitHub repository in your browser. This helper is locally built and ad-hoc signed, not notarized.
+
+Finder's accessibility tree varies between views and macOS versions. If a view does not expose enough information, use **Choose a file…** from the menu bar. After rebuilding, macOS may require removing and re-adding the helper's Accessibility entry.
+
+## Build, test, remove
+
+```sh
+swift test
+swift build -c release
+.build/release/FileWheel --render-preview docs/preview.png
+```
+
+The tests perform real image/document/audio/video conversions, decode the results, check orientation and all-page PDF export, verify collision handling and source preservation, reject ambiguous Finder names and symlinks, and cancel a running subprocess. Audio/video tests skip when FFmpeg is absent; CI installs it.
+
+Installed files:
+
+```text
+~/Library/Application Support/FileWheel/FileWheel.app
+~/Library/LaunchAgents/io.github.ethan-rong.filewheel.plist
+```
+
+To update, pull the source and rerun `./scripts/install.sh`. To remove it, finish or cancel any conversion, then run:
+
+```sh
+./scripts/uninstall.sh
+```
+
+Converted files stay where you saved them. Remove the Accessibility entry separately in System Settings if desired.
+
+## Design & credits
+
+Built with **SwiftUI, AppKit, SF Symbols, Image I/O, and PDFKit**. No third-party Swift packages. [Design notes →](docs/DESIGN.md)
+
+The radial interaction is inspired by [Filee](https://filee.sh/). FileWheel's code and visual identity are original; this project is not affiliated with Filee. External conversion engines retain their own licenses and are not bundled.
+
+[MIT license](LICENSE) · Early macOS release

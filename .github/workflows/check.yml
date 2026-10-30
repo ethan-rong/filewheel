@@ -1,0 +1,17 @@
+name: macOS checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install optional conversion engines
+        run: brew install ffmpeg webp
+      - name: Test real conversions
+        run: swift test
+      - name: Build the background helper
+        run: swift build -c release
+      - name: Check setup scripts
+        run: bash -n scripts/install.sh scripts/uninstall.sh
