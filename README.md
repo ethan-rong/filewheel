@@ -9,9 +9,9 @@
 A translucent conversion wheel for Finder and your desktop.
 
 [![macOS checks](https://github.com/ethan-rong/filewheel/actions/workflows/check.yml/badge.svg)](https://github.com/ethan-rong/filewheel/actions/workflows/check.yml)
-![macOS 13+](https://img.shields.io/badge/macOS-13%2B-22202b)
-![Swift](https://img.shields.io/badge/Swift-native-6446c7)
-[![MIT License](https://img.shields.io/badge/license-MIT-b6a1ed)](LICENSE)
+![macOS 13+](https://img.shields.io/badge/macOS-13%2B-111111)
+![Swift](https://img.shields.io/badge/Swift-native-444444)
+[![MIT License](https://img.shields.io/badge/license-MIT-777777)](LICENSE)
 
 **Hover. Choose. Keep the original.**
 
@@ -25,7 +25,7 @@ A translucent conversion wheel for Finder and your desktop.
 
 **Early preview:** conversion tests pass locally. Live Finder-hover verification is pending on the development Mac; the integration depends on Finder's accessibility tree and the user's permission.
 
-Rest your pointer over a supported file for about a second. A wheel appears with formats that fit that file. Click a format; the converted copy lands beside the original. If the name is taken, FileWheel adds a number.
+Move your pointer onto a supported file. A compact, 256-point wheel appears with formats that fit that file, without an intentional hover delay (the pointer is checked every 50 ms; Finder response time varies). Click a format to start conversion immediately; the converted copy lands beside the original. Large files still take time to process. If the name is taken, FileWheel adds a number.
 
 No main app window, account, or upload. One local setup builds a small menu-bar helper from source and starts it at login. **Local code is required**: a website cannot inspect the file under your pointer in Finder. macOS packages the helper in an `.app` bundle for its permission identity; you do not download a separate application or keep a window open.
 
@@ -54,7 +54,7 @@ These are installed separately through [Homebrew](https://brew.sh/); FileWheel d
 
 | Action | Result |
 | --- | --- |
-| Rest the pointer over a Finder or desktop file | Open its format wheel |
+| Move the pointer onto a Finder or desktop file | Open its format wheel without a dwell delay |
 | Hover a sector | Preview a format |
 | Click a sector or press Return | Convert |
 | Scroll, Tab / Shift-Tab, or arrow keys | Move between formats |
@@ -63,7 +63,7 @@ These are installed separately through [Homebrew](https://brew.sh/); FileWheel d
 | Show in Finder after conversion | Reveal the output |
 | Menu bar → Pause hovering | Stop automatic wheels until resumed |
 
-Frosted material in light mode. Smoked material in dark mode. Opaque labels and a violet selection in both. The wheel respects **Reduce Transparency** and **Reduce Motion**.
+White frosted material in light mode. Black smoked material in dark mode. Opaque labels and an inverted black/white selection keep both readable. The wheel respects **Reduce Transparency** and **Reduce Motion**. Its full panel is 280 × 316 points, including the small usage hint; there is no header bar.
 
 ## Common formats, real conversions
 

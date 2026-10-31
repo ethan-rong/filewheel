@@ -7,27 +7,26 @@ final class HoverWatcher {
     var onFile: (URL, NSPoint) -> Void = { _, _ in }
     private var timer: Timer?
     private var lastPoint = NSPoint.zero
-    private var stableSince = Date()
     private var checked = false
     private var suppressedPoint: NSPoint?
     private let system = AXUIElementCreateSystemWide()
 
     func start() {
         AXUIElementSetMessagingTimeout(system, 0.15)
-        timer = Timer.scheduledTimer(withTimeInterval: 0.15, repeats: true) { [weak self] _ in self?.tick() }
+        timer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in self?.tick() }
     }
 
     func suppressUntilMoved() { suppressedPoint = NSEvent.mouseLocation }
 
     private func tick() {
         let point = NSEvent.mouseLocation
-        if let suppressedPoint, hypot(point.x - suppressedPoint.x, point.y - suppressedPoint.y) > 60 { self.suppressedPoint = nil }
-        if hypot(point.x - lastPoint.x, point.y - lastPoint.y) > 3 {
-            lastPoint = point; stableSince = Date(); checked = false
+        if let suppressedPoint, hypot(point.x - suppressedPoint.x, point.y - suppressedPoint.y) > 8 { self.suppressedPoint = nil }
+        if hypot(point.x - lastPoint.x, point.y - lastPoint.y) > 1 {
+            lastPoint = point; checked = false
         }
         guard enabled, !checked, suppressedPoint == nil, !isWheelVisible(),
               NSEvent.pressedMouseButtons == 0,
-              Date().timeIntervalSince(stableSince) >= 0.7, AXIsProcessTrusted() else { return }
+              AXIsProcessTrusted() else { return }
         checked = true
         guard let screen = NSScreen.screens.first else { return }
         var hit: AXUIElement?

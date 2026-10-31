@@ -136,4 +136,18 @@ final class ConversionTests: XCTestCase {
         DispatchQueue.global().asyncAfter(deadline: .now() + 0.2) { job.cancel() }
         wait(for: [done], timeout: 3)
     }
+
+    func testWheelStartsSelectedConversionImmediatelyAndIgnoresBusyClicks() async {
+        await MainActor.run {
+            let model = WheelModel(input: URL(fileURLWithPath: "/sample/notes.txt"))
+            var chosen: [OutputFormat] = []
+            model.convert = { chosen.append($0) }
+            model.step(1)
+            model.choose()
+            XCTAssertEqual(chosen, [model.formats[1]])
+            model.busy = true
+            model.choose()
+            XCTAssertEqual(chosen.count, 1)
+        }
+    }
 }

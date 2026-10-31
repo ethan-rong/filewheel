@@ -134,7 +134,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         model.dismiss = { [weak self] in self?.dismiss() }
         model.cancel = { [weak self] in self?.job?.cancel() }
         model.convert = { [weak self] format in self?.convert(format) }
-        let size = NSSize(width: 440, height: 510)
+        let size = WheelView.size
         let screen = NSScreen.screens.first { $0.frame.contains(point) } ?? NSScreen.main
         let bounds = screen?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
         let origin = NSPoint(x: max(bounds.minX, min(point.x - size.width / 2, bounds.maxX - size.width)),
@@ -219,17 +219,17 @@ struct FileWheelMain {
 
     @MainActor private static func previewCard(model: WheelModel, dark: Bool) -> some View {
         VStack(spacing: 0) {
-            Text("A new format.").font(.system(size: 32, weight: .semibold, design: .rounded))
-            Text("A small gesture.").font(.system(size: 32, weight: .semibold, design: .rounded)).foregroundStyle(dark ? Color(red: 0.75, green: 0.66, blue: 1) : wheelViolet)
+            Text("FileWheel").font(.system(size: 22, weight: .semibold, design: .rounded))
+            Text("Hover. Choose. Converted.").font(.system(size: 12)).opacity(0.7).padding(.top, 6)
             WheelView(model: model).padding(.top, 18)
             Text(dark ? "SMOKED · DARK APPEARANCE" : "FROSTED · LIGHT APPEARANCE")
-                .font(.system(size: 10, weight: .bold, design: .rounded)).tracking(2).padding(.bottom, 28)
+                .font(.system(size: 9, weight: .medium, design: .rounded)).tracking(1.2).padding(.vertical, 20)
         }
-        .padding(.top, 36).frame(width: 500)
+        .padding(.top, 24).frame(width: 340)
         .background {
-            LinearGradient(colors: dark ? [Color(red: 0.08, green: 0.08, blue: 0.12), Color(red: 0.22, green: 0.17, blue: 0.31)] : [Color(red: 0.94, green: 0.93, blue: 0.97), Color(red: 0.80, green: 0.84, blue: 0.94)], startPoint: .topLeading, endPoint: .bottomTrailing)
+            LinearGradient(colors: dark ? [Color(white: 0.04), Color(white: 0.15)] : [.white, Color(white: 0.87)], startPoint: .topLeading, endPoint: .bottomTrailing)
         }
         .environment(\.colorScheme, dark ? .dark : .light)
-        .foregroundStyle(dark ? Color.white : Color(red: 0.1, green: 0.09, blue: 0.14))
+        .foregroundStyle(dark ? Color.white : Color.black)
     }
 }
